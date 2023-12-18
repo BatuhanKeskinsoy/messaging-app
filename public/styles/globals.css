@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html{
+        @apply box-border font-work-sans
+    }
+    body{
+        @apply bg-military-transparent bg-[#ECE3CE] bg-cover text-primary
+    }
+}
+
+*::-webkit-scrollbar {
+    @apply w-2 h-1 rounded-2xl
+}
+
+*::-webkit-scrollbar-track {
+    @apply bg-secondary
+}
+
+*::-webkit-scrollbar-thumb {
+    @apply bg-primary
+}

@@ -8,13 +8,24 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
+        backgroundImage: {
+          'military-transparent': "url('/assets/images/theme/background.png')",
+          'military': "url('/assets/images/theme/background2.png')",
+          'icon-bg': "url('/assets/images/theme/icon-bg.png')",
+        },
+        colors: {
+          'primary': '#3A4D39',
+          'secondary': '#ECE3CE',
+        },
+        boxShadow: {
+          'custom': '0 4px 10px 0px rgba(0,0,0,0.25)',
+        },
+        fontFamily: {
+          'work-sans': ['Work Sans', 'sans-serif'],
+        }
     },
   },
   plugins: [],
 }
 export default config
+
