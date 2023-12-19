@@ -38,26 +38,78 @@ function PasswordSecurity({ selectedPerson }: IPasswordSecurityProps) {
   const handleConfirm = () => {
     const enteredPassword = inputValues.join("");
     const correctPassword = selectedPerson?.password;
-
-    console.log("girilen", enteredPassword);
-    console.log("dogrusu", correctPassword);
-
+  
     if (enteredPassword === correctPassword) {
       setErrorMessage(null);
       setErrorMessage("True Password !");
       setPasswordSecurityShow(false);
+  
+      const storedPasswordSecurity = localStorage.getItem("password_security");
+      let parsedPasswordSecurity = storedPasswordSecurity ? JSON.parse(storedPasswordSecurity) : [];
+  
+      const existingEntryIndex = parsedPasswordSecurity.findIndex(
+        (entry : any) => entry.id === selectedPerson?.id
+      );
+  
+      if (existingEntryIndex !== -1) {
+        // Entry for this ID exists, update it
+        parsedPasswordSecurity[existingEntryIndex].isAuthenticated = true;
+      } else {
+        // No entry for this ID, create a new one
+        parsedPasswordSecurity.push({
+          id: selectedPerson?.id,
+          isAuthenticated: true,
+        });
+      }
+  
+      localStorage.setItem("password_security", JSON.stringify(parsedPasswordSecurity));
     } else {
       setErrorMessage("Wrong password. Please try again.");
       setInputValues(["", "", "", "", ""]);
       setPasswordSecurityShow(true);
     }
   };
+  
 
   useEffect(() => {
-    setPasswordSecurityShow(true);
-    setInputValues(["", "", "", "", ""]);
-    setErrorMessage(null);
+    const storedPasswordSecurity = localStorage.getItem("password_security");
+    let parsedPasswordSecurity;
+  
+    if (storedPasswordSecurity) {
+      parsedPasswordSecurity = JSON.parse(storedPasswordSecurity);
+  
+      const foundEntry = parsedPasswordSecurity.find(
+        (entry: any) => entry.id === selectedPerson?.id && entry.isAuthenticated
+      );
+  
+      if (foundEntry) {
+        setPasswordSecurityShow(false);
+      } else {
+        setPasswordSecurityShow(true);
+        setInputValues(["", "", "", "", ""]);
+        setErrorMessage(null);
+      }
+    } else {
+      setPasswordSecurityShow(true);
+      setInputValues(["", "", "", "", ""]);
+      setErrorMessage(null);
+    }
   }, [selectedPerson]);
+  
+
+  useEffect(() => {
+    // Sayfa ilk yüklendiğinde çalışacak olan kısım
+    const storedPasswordSecurity = localStorage.getItem("password_security");
+    let parsedPasswordSecurity;
+  
+    if (storedPasswordSecurity) {
+      parsedPasswordSecurity = JSON.parse(storedPasswordSecurity);
+  
+      if (parsedPasswordSecurity.id === selectedPerson?.id && parsedPasswordSecurity.isAuthenticated) {
+        setPasswordSecurityShow(false);
+      }
+    }
+  }, []);
 
   return (
     <div
