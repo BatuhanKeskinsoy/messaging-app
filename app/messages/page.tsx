@@ -1,49 +1,54 @@
 "use client";
 import CustomButton from "@/components/CustomButton";
+import Loading from "@/components/Loading";
 import PersonCard from "@/components/Messages/PersonCard";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { persons, messages } from "@/constants";
+import MessagesContent from "@/components/Messages/MessagesContent";
 
 function page() {
   const router = useRouter();
+  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [readMessage, setReadMessage] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const persons = [
-    {
-      id: 1,
-      fullname: "Robert Angier",
-      image: "/assets/images/persons/robert-angier.png",
-      isOnline: true,
-      isPrivate: true,
-    },
-    {
-      id: 2,
-      fullname: "Alfred Borden",
-      image: "/assets/images/persons/alfred-borden.png",
-      isOnline: true,
-      isPrivate: true,
-    },
-    {
-      id: 3,
-      fullname: "Olivia Wenscombe",
-      image: "/assets/images/persons/olivia-wenscombe.png",
-      isOnline: false,
-      isPrivate: false,
-    },
-    {
-      id: 4,
-      fullname: "Sarah Borden",
-      image: "/assets/images/persons/sarah-borden.png",
-      isOnline: true,
-      isPrivate: false,
-    },
-  ];
+  const handlePersonClick = (person: any) => {
+    setSelectedPerson(person);
+    sessionStorage.setItem("selectedPerson", JSON.stringify(person));
+    setReadMessage(true);
+  };
+
+  useEffect(() => {
+    const storedSelectedPerson = sessionStorage.getItem("selectedPerson");
+    if (storedSelectedPerson) {
+      const parsedSelectedPerson = JSON.parse(storedSelectedPerson);
+      setSelectedPerson(parsedSelectedPerson);
+      setLoading(false);
+    }
+  }, []);
+
+  function getLastMessageTime(personId: number) {
+    const filtered = messages.filter(
+      (message) => message.sender_id === personId
+    );
+    const lastMessage = filtered[filtered.length - 1];
+    if (lastMessage) {
+      return new Date(lastMessage.created_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return "";
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center md:bg-none bg-military">
       <div className="md:hidden flex relative h-24  items-center justify-center w-full">
         <div className="absolute left-2 h-full flex items-center justify-center">
           <CustomButton
-            leftIcon="assets/icons/right-white.svg"
+            leftIcon="assets/icons/left-white.svg"
             iconAlt="Chat Beyaz İkon"
             iconWidth={16}
             iconHeight={16}
@@ -75,7 +80,11 @@ function page() {
             iconAlt="Plus White"
           />
         </div>
-        <div className="flex flex-col w-full md:w-fit md:h-full shadow-custom z-10">
+        <div
+          className={`${
+            readMessage ? "hidden md:!flex" : "flex"
+          } flex-col w-full md:w-fit md:h-full shadow-custom z-10`}
+        >
           <div className="flex md:justify-start justify-center items-center md:py-4 py-8 px-5 bg-secondary md:bg-[#4F6F52] gap-4 w-full md:shadow-custom z-10">
             <Image
               src={"/assets/icons/chat-white.svg"}
@@ -90,8 +99,14 @@ function page() {
           </div>
           <div className="flex flex-col gap-0 bg-secondary h-[calc(100%-64px)] w-full overflow-hidden">
             <div className="flex flex-col w-full md:p-0 p-4 h-full overflow-y-auto md:gap-0 gap-4">
-              {persons.map((person, key) => (
-                <PersonCard person={person} key={key} />
+              {persons.map((person) => (
+                <PersonCard
+                  key={person.id}
+                  person={person}
+                  onClick={() => handlePersonClick(person)}
+                  lastMessageTime={getLastMessageTime(person.id)}
+                  messages={messages}
+                />
               ))}
             </div>
             <div className="flex flex-col gap-8 w-full p-4 border-t border-[#739072]/30">
@@ -104,22 +119,67 @@ function page() {
             </div>
           </div>
         </div>
-        <div className="md:flex hidden flex-col items-center justify-between bg-secondary h-full w-full min-w-[800px] py-5">
-          {/* Kişiye tıklandığında gelecek sayfa yapılacak state ile yönetilecek chat içeriği için ayrı bi json yazıcam tepeye */}
-          <div className="flex flex-col gap-10 w-full h-full justify-center items-center">
-            <div className="relative md:w-40 md:h-40 w-[110px] h-[110px] rounded-full bg-icon-bg bg-cover flex items-center justify-center">
-              <Image
-                src={"/assets/icons/chat-green.svg"}
-                alt="Chat İkonu"
-                width={60}
-                height={60}
-                className="md:w-[60px] md:h-[60px] w-[40px] h-[40px]"
+        <div
+          className={`${
+            readMessage ? "flex" : "hidden md:!flex"
+          } bg-secondary h-full w-full min-w-[800px]`}
+        >
+          {loading ? (
+            <Loading />
+          ) : selectedPerson ? (
+            <div className="flex-col md:w-full w-screen h-full">
+              <div className="flex justify-between items-center border-b border-[#739072]/30 md:px-8 px-4 py-3 w-full">
+                <div className="flex gap-4 items-center">
+                  <CustomButton
+                    containerStyles="md:hidden flex"
+                    leftIcon="/assets/icons/left-green.svg"
+                    handleClick={() => setReadMessage(false)}
+                  />
+                  <div className="relative w-[60px] min-w-[60px] h-[60px] rounded-full border border-[#E9B824]">
+                    <Image
+                      src={selectedPerson.image}
+                      alt="Person Profile Photo"
+                      fill
+                      sizes="(max-width: 768px) 50vw, 10vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-lg line-clamp-1">
+                      {selectedPerson.fullname}
+                    </span>
+                    <small className="text-[#898959]">
+                      {selectedPerson.isOnline ? "Online" : "Offline"}
+                    </small>
+                  </div>
+                </div>
+                <div className="flex gap-6 items-center">
+                  <CustomButton leftIcon="/assets/icons/block-green.svg" />
+                  <CustomButton leftIcon="/assets/icons/trash-red.svg" />
+                </div>
+              </div>
+              <MessagesContent
+                selectedPerson={selectedPerson}
+                messages={messages}
+                persons={persons}
               />
             </div>
-            <span className="text-primary font-bold text-3xl md:w-[466px] w-full text-center">
-              Start a conversation or reply your messages
-            </span>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-10 w-full h-full justify-center items-center">
+              <div className="relative md:w-40 md:h-40 w-[110px] h-[110px] rounded-full bg-icon-bg bg-cover flex items-center justify-center">
+                <Image
+                  src={"/assets/icons/chat-green.svg"}
+                  alt="Chat İkonu"
+                  width={60}
+                  height={60}
+                  className="md:w-[60px] md:h-[60px] w-[40px] h-[40px]"
+                />
+              </div>
+              <span className="text-primary font-bold text-3xl md:w-[466px] w-full text-center">
+                Start a conversation or reply your messages
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -13,7 +13,7 @@ function page() {
       <div className="md:hidden flex relative h-24 items-center justify-center w-full">
         <div className="absolute left-2 h-full flex items-center justify-center">
           <CustomButton
-            leftIcon="assets/icons/right-white.svg"
+            leftIcon="assets/icons/left-white.svg"
             iconAlt="Chat Beyaz İkon"
             iconWidth={16}
             iconHeight={16}

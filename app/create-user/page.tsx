@@ -12,7 +12,7 @@ function page() {
       <div className="md:hidden flex relative h-24 items-center justify-center w-full">
         <div className="absolute left-2 h-full flex items-center justify-center">
           <CustomButton
-            leftIcon="assets/icons/right-white.svg"
+            leftIcon="assets/icons/left-white.svg"
             iconAlt="Chat Beyaz İkon"
             iconWidth={16}
             iconHeight={16}
@@ -69,7 +69,7 @@ function page() {
             title="Set Name"
             containerStyles="hidden md:flex bg-primary rounded-[20px] md:p-[20px_12px] p-[16px_12px] w-full shadow-custom items-center justify-center"
             textStyles="text-secondary font-bold text-xl"
-            handleClick={() => router.push("/create-user")}
+            handleClick={() => router.push("/messages")}
           />
           <CustomButton
             title="Confirm"
