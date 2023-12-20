@@ -7,12 +7,14 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { persons, messages } from "@/constants";
 import MessagesContent from "@/components/Messages/MessagesContent";
+import NewPerson from "@/components/Messages/NewPerson";
 
 function page() {
   const router = useRouter();
   const [selectedPerson, setSelectedPerson] = useState<any>(null);
   const [readMessage, setReadMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [newPerson, setNewPerson] = useState(false);
 
   const handlePersonClick = (person: any) => {
     setSelectedPerson(person);
@@ -25,8 +27,8 @@ function page() {
     if (storedSelectedPerson) {
       const parsedSelectedPerson = JSON.parse(storedSelectedPerson);
       setSelectedPerson(parsedSelectedPerson);
-      setLoading(false);
     }
+    setLoading(false);
   }, []);
 
   function getLastMessageTime(personId: number) {
@@ -35,16 +37,69 @@ function page() {
     );
     const lastMessage = filtered[filtered.length - 1];
     if (lastMessage) {
-      return new Date(lastMessage.created_at).toLocaleTimeString([], {
+      const messageDate = new Date(lastMessage.created_at);
+      const messageTime = messageDate.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
+
+      // Gün, ay ve yılı al
+      const day = messageDate.getDate();
+      const month = messageDate.getMonth() + 1;
+      const year = messageDate.getFullYear();
+
+      // PersonCard'a sadece saat ve dakika döndür, sıralamada tam zamanı kullan
+      return {
+        time: messageTime,
+        fullDate: `${day}/${month}/${year}`,
+      };
     }
-    return "";
+
+    return {
+      time: "",
+      fullDate: "",
+    };
   }
+
+  const sortedPersons = [...persons].sort((personA, personB) => {
+    const { time: timeA, fullDate: fullDateA } = getLastMessageTime(personA.id);
+    const { time: timeB, fullDate: fullDateB } = getLastMessageTime(personB.id);
+
+    const [dayA, monthA, yearA] = fullDateA.split("/");
+    const [dayB, monthB, yearB] = fullDateB.split("/");
+
+    const dateA = new Date(`${yearA}-${monthA}-${dayA}T${timeA}`);
+    const dateB = new Date(`${yearB}-${monthB}-${dayB}T${timeB}`);
+
+    if (dateA > dateB) {
+      return -1;
+    } else if (dateA < dateB) {
+      return 1;
+    } else {
+      // Aynı tarih, saatlere göre sırala
+      const [hourA, minuteA] = timeA.split(":");
+      const [hourB, minuteB] = timeB.split(":");
+
+      if (hourA !== hourB) {
+        return parseInt(hourB) - parseInt(hourA);
+      } else {
+        return parseInt(minuteB) - parseInt(minuteA);
+      }
+    }
+  });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center md:bg-none bg-military">
+      {newPerson && (
+        <div className="absolute w-screen h-screen left-0 top-0 z-30 flex items-center justify-center">
+          <div
+            className="absolute w-full h-full bg-[#739072B2]/70"
+            onClick={() => setNewPerson(false)}
+            style={{ zIndex: -1 }} // Arkadaki div'i tıklanamaz hale getirir
+          ></div>
+            <NewPerson setNewPerson={setNewPerson} />
+        </div>
+      )}
       <div className="md:hidden flex relative h-24  items-center justify-center w-full">
         <div className="absolute left-2 h-full flex items-center justify-center">
           <CustomButton
@@ -78,6 +133,7 @@ function page() {
             iconHeight={60}
             iconWidth={60}
             iconAlt="Plus White"
+            handleClick={() => setNewPerson(true)}
           />
         </div>
         <div
@@ -85,7 +141,7 @@ function page() {
             readMessage ? "hidden md:!flex" : "flex"
           } flex-col w-full md:w-fit md:h-full shadow-custom z-10`}
         >
-          <div className="flex md:justify-start justify-center items-center md:py-4 py-8 px-5 bg-secondary md:bg-[#4F6F52] gap-4 w-full md:shadow-custom z-10">
+          <div className="flex md:justify-start justify-between items-center md:py-4 py-8 px-5 bg-secondary md:bg-[#4F6F52] gap-4 w-full md:shadow-custom z-10">
             <Image
               src={"/assets/icons/chat-white.svg"}
               width={20}
@@ -96,10 +152,18 @@ function page() {
             <span className="md:text-secondary font-semibold md:text-2xl text-3xl">
               New Messages
             </span>
+            <CustomButton
+              leftIcon="/assets/icons/plus-circle-white.svg"
+              iconHeight={60}
+              iconWidth={60}
+              iconAlt="Plus White"
+              containerStyles="md:hidden"
+              handleClick={() => router.push("/new-person")}
+            />
           </div>
           <div className="flex flex-col gap-0 bg-secondary h-[calc(100%-64px)] w-full overflow-hidden">
             <div className="flex flex-col w-full md:p-0 p-4 h-full overflow-y-auto md:gap-0 gap-4">
-              {persons.map((person) => (
+              {sortedPersons.map((person) => (
                 <PersonCard
                   key={person.id}
                   person={person}

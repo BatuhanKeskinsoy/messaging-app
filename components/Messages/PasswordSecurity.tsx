@@ -38,19 +38,21 @@ function PasswordSecurity({ selectedPerson }: IPasswordSecurityProps) {
   const handleConfirm = () => {
     const enteredPassword = inputValues.join("");
     const correctPassword = selectedPerson?.password;
-  
+
     if (enteredPassword === correctPassword) {
       setErrorMessage(null);
       setErrorMessage("True Password !");
       setPasswordSecurityShow(false);
-  
+
       const storedPasswordSecurity = localStorage.getItem("password_security");
-      let parsedPasswordSecurity = storedPasswordSecurity ? JSON.parse(storedPasswordSecurity) : [];
-  
+      let parsedPasswordSecurity = storedPasswordSecurity
+        ? JSON.parse(storedPasswordSecurity)
+        : [];
+
       const existingEntryIndex = parsedPasswordSecurity.findIndex(
-        (entry : any) => entry.id === selectedPerson?.id
+        (entry: any) => entry.id === selectedPerson?.id
       );
-  
+
       if (existingEntryIndex !== -1) {
         // Entry for this ID exists, update it
         parsedPasswordSecurity[existingEntryIndex].isAuthenticated = true;
@@ -61,27 +63,29 @@ function PasswordSecurity({ selectedPerson }: IPasswordSecurityProps) {
           isAuthenticated: true,
         });
       }
-  
-      localStorage.setItem("password_security", JSON.stringify(parsedPasswordSecurity));
+
+      localStorage.setItem(
+        "password_security",
+        JSON.stringify(parsedPasswordSecurity)
+      );
     } else {
       setErrorMessage("Wrong password. Please try again.");
       setInputValues(["", "", "", "", ""]);
       setPasswordSecurityShow(true);
     }
   };
-  
 
   useEffect(() => {
     const storedPasswordSecurity = localStorage.getItem("password_security");
     let parsedPasswordSecurity;
-  
+
     if (storedPasswordSecurity) {
       parsedPasswordSecurity = JSON.parse(storedPasswordSecurity);
-  
+
       const foundEntry = parsedPasswordSecurity.find(
         (entry: any) => entry.id === selectedPerson?.id && entry.isAuthenticated
       );
-  
+
       if (foundEntry) {
         setPasswordSecurityShow(false);
       } else {
@@ -95,17 +99,19 @@ function PasswordSecurity({ selectedPerson }: IPasswordSecurityProps) {
       setErrorMessage(null);
     }
   }, [selectedPerson]);
-  
 
   useEffect(() => {
     // Sayfa ilk yüklendiğinde çalışacak olan kısım
     const storedPasswordSecurity = localStorage.getItem("password_security");
     let parsedPasswordSecurity;
-  
+
     if (storedPasswordSecurity) {
       parsedPasswordSecurity = JSON.parse(storedPasswordSecurity);
-  
-      if (parsedPasswordSecurity.id === selectedPerson?.id && parsedPasswordSecurity.isAuthenticated) {
+
+      if (
+        parsedPasswordSecurity.id === selectedPerson?.id &&
+        parsedPasswordSecurity.isAuthenticated
+      ) {
         setPasswordSecurityShow(false);
       }
     }
@@ -133,20 +139,21 @@ function PasswordSecurity({ selectedPerson }: IPasswordSecurityProps) {
           </span>
           <hr className="w-12 border-2 border-primary rounded-full" />
         </div>
-      </div>
-      <div className="flex gap-5 items-center">
-        {inputValues.map((value, index) => (
-          <input
-            key={index}
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(index, e.target.value)}
-            ref={(input) => (inputRefs.current[index] = input)}
-            className="w-[70px] h-[80px] bg-[#FCF2DA] shadow-custom rounded-[10px] outline-none flex items-center justify-center text-center text-4xl"
-            maxLength={1}
-            autoFocus={index === 0}
-          />
-        ))}
+        <div className="flex gap-5 items-center justify-center">
+          {inputValues.map((value, index) => (
+            <input
+              key={index}
+              type="password"
+              value={value}
+              placeholder="*"
+              onChange={(e) => handleInputChange(index, e.target.value)}
+              ref={(input) => (inputRefs.current[index] = input)}
+              className="md:w-[70px] md:h-[80px] w-[15%] h-[20vw] max-w-[70px] max-h-[80px] bg-[#FCF2DA] shadow-custom rounded-[10px] outline-none flex items-center justify-center text-center md:text-4xl text-xl placeholder:text-primary/30"
+              maxLength={1}
+              autoFocus={index === 0}
+            />
+          ))}
+        </div>
       </div>
       <div className="flex flex-col gap-8 w-full">
         <CustomButton

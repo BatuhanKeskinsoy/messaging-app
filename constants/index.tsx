@@ -146,4 +146,20 @@ export const messages = [
     user_message: "User 1. Message",
     created_at: "2023-12-19 18:35:57",
   },
+  {
+    id: 15,
+    user_id: 1,
+    sender_id: 2,
+    sender_message: "User 4. Message",
+    user_message: null,
+    created_at: "2023-12-19 18:45:57",
+  },
+  {
+    id: 16,
+    user_id: 1,
+    sender_id: 1,
+    sender_message: "User 4. Message",
+    user_message: null,
+    created_at: "2023-12-20 12:13:57",
+  },
 ];

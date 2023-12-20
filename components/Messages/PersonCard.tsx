@@ -21,7 +21,10 @@ interface Message {
 interface IPersonCard {
   person: Person;
   onClick: () => void;
-  lastMessageTime: string;
+  lastMessageTime: {
+    time: string;
+    fullDate: string;
+  };
   messages: Message[];
 }
 
@@ -63,16 +66,21 @@ function PersonCard({
     >
       <div className="flex items-center gap-4">
         <div
-          className={`w-5 h-5 min-w-[20px] ${
+          className={`md:flex hidden w-5 h-5 min-w-[20px] ${
             person.isOnline ? "bg-[#29AE36]" : "bg-transparent"
           }  rounded-full`}
         />
-        <div className="relative min-w-[70px] w-[70px] h-[70px] border-2 border-[#E9B824] rounded-full overflow-hidden">
+        <div className="relative min-w-[70px] w-[70px] h-[70px] border-2 border-[#E9B824] rounded-full">
           <Image
             src={person.image}
             alt={person.fullname}
             fill
             className="object-cover"
+          />
+          <div
+            className={`md:hidden absolute left-0.5 top-0.5 w-4 h-4 min-w-[12px] ${
+              person.isOnline ? "bg-[#29AE36]" : "bg-transparent"
+            }  rounded-full`}
           />
         </div>
         <div className="flex flex-col justify-center items-start gap-1.5">
@@ -93,7 +101,10 @@ function PersonCard({
           )}
         </div>
       </div>
-      <div className="text-[#898959] py-2.5">{lastMessageTime}</div>
+      <div className="text-[#898959] py-2.5 flex flex-col items-end">
+        <span>{lastMessageTime.time}</span>
+        <small>{lastMessageTime.fullDate}</small>
+      </div>
     </button>
   );
 }
